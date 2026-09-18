@@ -8,6 +8,7 @@ This directory contains the FastAPI backend for the Project Management MVP. The 
 
 - `app/main.py` creates the FastAPI application and defines the initial routes.
 - `app/datastore.py` defines the validated JSON document models, default board, and atomic file datastore.
+- `app/auth.py` provides the MVP HTTP Basic authentication dependency.
 - `static/index.html` is the temporary static page served at `/` until the frontend export is integrated.
 - `tests/test_main.py` contains backend tests using FastAPI's test client.
 
@@ -22,6 +23,10 @@ uv run uvicorn backend.app.main:app --reload
 ```
 
 The local backend listens on port `8000`. The Docker scripts publish it on host port `3000`.
+
+The protected board routes are `GET /api/board` and `PUT /api/board`. They use HTTP Basic credentials from `KANBAN_USERNAME` and `KANBAN_PASSWORD`, defaulting to `user` and `password`. Explicit user routes are also available at `/api/users/{user_id}/board` and reject access to another user.
+
+The API allows local development calls from the frontend at ports `3000` on `127.0.0.1` and `localhost`. Production uses same-origin requests.
 
 ## Conventions
 

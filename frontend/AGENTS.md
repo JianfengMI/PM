@@ -14,6 +14,7 @@ This directory contains the Next.js frontend for the Project Management MVP. The
   - `KanbanCardPreview.tsx` renders the drag overlay preview.
   - `NewCardForm.tsx` handles local new-card form state.
 - `src/lib/kanban.ts` defines `Card`, `Column`, and `BoardData`, provides the demo data, and contains card movement and ID helpers.
+- `src/lib/api.ts` contains the authenticated board API client used by the signed-in page.
 - `src/**/*.test.{ts,tsx}` contains Vitest unit and component tests.
 - `tests/` contains Playwright browser tests.
 - `public/` contains static frontend assets.
@@ -34,6 +35,8 @@ npm run test:all
 
 The development server and Playwright tests use port `3000`.
 
+In development, board API requests target FastAPI at `http://127.0.0.1:8000`. Set `NEXT_PUBLIC_API_BASE_URL` to override this. Production static exports use same-origin `/api` requests because FastAPI serves the frontend and API together.
+
 ## Conventions
 
 - Use TypeScript and existing React/Next.js patterns.
@@ -48,4 +51,4 @@ The development server and Playwright tests use port `3000`.
 
 Vitest runs in `jsdom` with `src/test/setup.ts` and includes tests under `src/`. Playwright starts the Next.js development server automatically using `playwright.config.ts`. The current demo tests cover rendering five columns, renaming a column, adding and removing a card, and moving a card between columns.
 
-When the backend integration is added, keep frontend tests deterministic by mocking API responses in unit tests and using the documented local backend/container for end-to-end tests.
+The API client tests mock `fetch`. Browser tests should use the documented local backend/container so board reads and writes exercise the real API.

@@ -15,23 +15,65 @@ import { KanbanColumn } from "@/components/KanbanColumn";
 import { KanbanCardPreview } from "@/components/KanbanCardPreview";
 import {
   createId,
-  loadBoard,
   moveCard,
-  saveBoard,
+  initialData,
   type BoardData,
 } from "@/lib/kanban";
+import { fetchBoard, updateBoard } from "@/lib/api";
+import type { Account } from "@/lib/auth";
 
 type KanbanBoardProps = {
+  account?: Account;
   onLogout?: () => void;
 };
 
-export const KanbanBoard = ({ onLogout = () => {} }: KanbanBoardProps) => {
-  const [board, setBoard] = useState<BoardData>(() => loadBoard());
+export const KanbanBoard = ({ account, onLogout = () => {} }: KanbanBoardProps) => {
+  const [board, setBoard] = useState<BoardData>(() => initialData);
+  const [isLoading, setIsLoading] = useState(Boolean(account));
+  const [error, setError] = useState("");
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
 
   useEffect(() => {
-    saveBoard(board);
-  }, [board]);
+    if (!account) {
+      return;
+    }
+
+    let isCurrent = true;
+    const credentials = {
+      username: account.username,
+      password: account.password,
+    };
+    fetchBoard(credentials)
+      .then((nextBoard) => {
+        if (isCurrent) {
+          setBoard(nextBoard);
+          setError("");
+        }
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setError("Unable to load your board. Check that the backend is running.");
+        }
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [account]);
+
+  const applyBoard = (nextBoard: BoardData) => {
+    setBoard(nextBoard);
+    if (account) {
+      updateBoard(nextBoard, account).catch(() => {
+        setError("Unable to save your latest board change.");
+      });
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -53,60 +95,66 @@ export const KanbanBoard = ({ onLogout = () => {} }: KanbanBoardProps) => {
       return;
     }
 
-    setBoard((prev) => ({
-      ...prev,
-      columns: moveCard(prev.columns, active.id as string, over.id as string),
-    }));
+    const nextBoard = {
+      ...board,
+      columns: moveCard(board.columns, active.id as string, over.id as string),
+    };
+    applyBoard(nextBoard);
   };
 
   const handleRenameColumn = (columnId: string, title: string) => {
-    setBoard((prev) => ({
-      ...prev,
-      columns: prev.columns.map((column) =>
+    applyBoard({
+      ...board,
+      columns: board.columns.map((column) =>
         column.id === columnId ? { ...column, title } : column
       ),
-    }));
+    });
   };
 
   const handleAddCard = (columnId: string, title: string, details: string) => {
     const id = createId("card");
-    setBoard((prev) => ({
-      ...prev,
+    applyBoard({
+      ...board,
       cards: {
-        ...prev.cards,
+        ...board.cards,
         [id]: { id, title, details: details || "No details yet." },
       },
-      columns: prev.columns.map((column) =>
+      columns: board.columns.map((column) =>
         column.id === columnId
           ? { ...column, cardIds: [...column.cardIds, id] }
           : column
       ),
-    }));
+    });
   };
 
   const handleDeleteCard = (columnId: string, cardId: string) => {
-    setBoard((prev) => {
-      return {
-        ...prev,
-        cards: Object.fromEntries(
-          Object.entries(prev.cards).filter(([id]) => id !== cardId)
-        ),
-        columns: prev.columns.map((column) =>
-          column.id === columnId
-            ? {
-                ...column,
-                cardIds: column.cardIds.filter((id) => id !== cardId),
-              }
-            : column
-        ),
-      };
+    applyBoard({
+      ...board,
+      cards: Object.fromEntries(
+        Object.entries(board.cards).filter(([id]) => id !== cardId)
+      ),
+      columns: board.columns.map((column) =>
+        column.id === columnId
+          ? {
+              ...column,
+              cardIds: column.cardIds.filter((id) => id !== cardId),
+            }
+          : column
+      ),
     });
   };
 
   const activeCard = activeCardId ? cardsById[activeCardId] : null;
 
-  const handleLogout = () => {
-    saveBoard(board);
+  const handleLogout = async () => {
+    if (account) {
+      try {
+        await updateBoard(board, account);
+      } catch {
+        setError("Unable to save your latest board change.");
+        return;
+      }
+    }
     onLogout();
   };
 
@@ -159,6 +207,14 @@ export const KanbanBoard = ({ onLogout = () => {} }: KanbanBoardProps) => {
               </div>
             ))}
           </div>
+          {isLoading ? (
+            <p className="text-sm font-semibold text-[var(--gray-text)]">Loading board...</p>
+          ) : null}
+          {error ? (
+            <p role="alert" className="text-sm font-semibold text-[var(--secondary-purple)]">
+              {error}
+            </p>
+          ) : null}
         </header>
 
         <DndContext

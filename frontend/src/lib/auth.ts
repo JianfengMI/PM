@@ -3,7 +3,7 @@ export const ACCOUNT_STORAGE_KEY = "kanban-studio-account";
 
 const listeners = new Set<() => void>();
 
-type Account = {
+export type Account = {
   username: string;
   password: string;
 };

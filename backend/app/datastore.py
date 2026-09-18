@@ -207,6 +207,29 @@ class JsonDataStore:
             if temporary_path and temporary_path.exists():
                 temporary_path.unlink()
 
+    def get_user(self, user_id: str) -> UserRecord:
+        document = self.read()
+        for user in document.users:
+            if user.id == user_id:
+                return user
+        raise KeyError(user_id)
+
+    def get_user_by_username(self, username: str) -> UserRecord:
+        document = self.read()
+        for user in document.users:
+            if user.username == username:
+                return user
+        raise KeyError(username)
+
+    def update_board(self, user_id: str, board: Board) -> Board:
+        document = self.read()
+        for index, user in enumerate(document.users):
+            if user.id == user_id:
+                document.users[index] = user.model_copy(update={"board": board})
+                self.write(document)
+                return board
+        raise KeyError(user_id)
+
     def _ensure_initialized(self) -> None:
         if not self.path.exists():
             self.write(default_document())

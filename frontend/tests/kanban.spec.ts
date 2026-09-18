@@ -54,12 +54,13 @@ test("loads the kanban board", async ({ page }) => {
 
 test("adds a card to a column", async ({ page }) => {
   await signIn(page);
+  const cardTitle = `Playwright card ${Date.now()}`;
   const firstColumn = page.locator('[data-testid^="column-"]').first();
   await firstColumn.getByRole("button", { name: /add a card/i }).click();
-  await firstColumn.getByPlaceholder("Card title").fill("Playwright card");
+  await firstColumn.getByPlaceholder("Card title").fill(cardTitle);
   await firstColumn.getByPlaceholder("Details").fill("Added via e2e.");
   await firstColumn.getByRole("button", { name: /add card/i }).click();
-  await expect(firstColumn.getByText("Playwright card")).toBeVisible();
+  await expect(firstColumn.getByText(cardTitle, { exact: true })).toBeVisible();
 });
 
 test("moves a card between columns", async ({ page }) => {
@@ -88,20 +89,18 @@ test("moves a card between columns", async ({ page }) => {
 
 test("persists board changes after logout and sign in", async ({ page }) => {
   await signIn(page);
+  const persistentCardTitle = `Persistent card ${Date.now()}`;
   const firstColumn = page.locator('[data-testid^="column-"]').first();
   await firstColumn.getByRole("button", { name: /add a card/i }).click();
-  await firstColumn.getByPlaceholder("Card title").fill("Persistent card");
+  await firstColumn.getByPlaceholder("Card title").fill(persistentCardTitle);
   await firstColumn.getByPlaceholder("Details").fill("Saved locally.");
   await firstColumn.getByRole("button", { name: /add card/i }).click();
-  await expect(firstColumn.getByText("Persistent card")).toBeVisible();
+  await expect(firstColumn.getByText(persistentCardTitle, { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Log out" }).click();
-  await expect
-    .poll(() => page.evaluate(() => window.localStorage.getItem("kanban-studio-board")))
-    .toContain("Persistent card");
   await page.getByRole("textbox", { name: "Username" }).fill("user");
   await page.getByRole("textbox", { name: "Password", exact: true }).fill("password");
   await page.getByRole("button", { name: "Sign in" }).click();
 
-  await expect(page.getByText("Persistent card")).toBeVisible();
+  await expect(page.getByText(persistentCardTitle, { exact: true })).toBeVisible();
 });

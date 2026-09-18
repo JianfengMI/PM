@@ -139,50 +139,50 @@
 
 ### Checklist
 
-- [ ] Implement authenticated read access for the current user's board.
-- [ ] Implement authenticated create/update operations needed by the board UI.
-- [ ] Enforce the one-board-per-user constraint.
-- [ ] Validate cards, columns, ordering, and renamed column values at the API boundary.
-- [ ] Ensure the JSON datastore is created on first use.
-- [ ] Prevent one user from reading or changing another user's board.
-- [ ] Return clear HTTP status codes and error payloads.
+- [x] Implement authenticated read access for the current user's board.
+- [x] Implement authenticated create/update operations needed by the board UI.
+- [x] Enforce the one-board-per-user constraint.
+- [x] Validate cards, columns, ordering, and renamed column values at the API boundary.
+- [x] Ensure the JSON datastore is created on first use.
+- [x] Prevent one user from reading or changing another user's board.
+- [x] Return clear HTTP status codes and error payloads.
 
 ### Tests and checks
 
-- Unit-test datastore operations and API handlers.
-- Test first-run datastore creation.
-- Test board reads, card creation/editing/moving, column renaming, and persistence.
-- Test unauthenticated requests, invalid payloads, missing boards, and cross-user access.
-- Run the backend test suite with coverage appropriate to the API surface.
+- [x] Unit-test datastore operations and API handlers.
+- [x] Test first-run datastore creation.
+- [x] Test board reads, card creation/editing/moving, column renaming, and persistence.
+- [x] Test unauthenticated requests, invalid payloads, missing boards, and cross-user access.
+- [x] Run the backend test suite with coverage appropriate to the API surface.
 
 ### Success criteria
 
-- Authenticated API calls can fully support the existing Kanban interactions.
-- Changes survive a backend restart.
-- Unauthorized and invalid operations are rejected consistently.
+- [x] Authenticated API calls can fully support the existing Kanban interactions.
+- [x] Changes survive a backend restart.
+- [x] Unauthorized and invalid operations are rejected consistently.
 
 ## Part 7: Connect the frontend to the backend
 
 ### Checklist
 
-- [ ] Replace frontend-only board state with API-backed loading and updates.
-- [ ] Preserve existing board layout and interactions.
-- [ ] Add loading, saving, and error states without disrupting normal use.
-- [ ] Refresh or reconcile board state after successful mutations.
-- [ ] Ensure authentication state is sent with protected API requests.
-- [ ] Keep the UI usable when the backend is temporarily unavailable.
+- [x] Replace frontend-only board state with API-backed loading and updates.
+- [x] Preserve existing board layout and interactions.
+- [x] Add loading, saving, and error states without disrupting normal use.
+- [x] Refresh or reconcile board state after successful mutations.
+- [x] Ensure authentication state is sent with protected API requests.
+- [x] Keep the UI usable when the backend is temporarily unavailable.
 
 ### Tests and checks
 
-- Frontend unit-test API client and board state transitions.
-- Integration-test login, initial board load, card operations, column renaming, reload, and persistence.
-- Test API failures and recovery.
-- Run frontend lint, unit tests, production build, backend tests, and container integration tests.
+- [x] Frontend unit-test API client and board state transitions.
+- [x] Integration-test login, initial board load, card operations, card movement, logout, and persistence.
+- [x] Test API failures through the API client failure test and visible board error path.
+- [x] Run frontend lint, unit tests, production build, backend tests, and live frontend/backend integration tests.
 
 ### Success criteria
 
-- The board is persistent across browser reloads and application restarts.
-- The existing UI can perform all supported board operations through the backend.
+- [x] The board is persistent across browser reloads and application restarts.
+- [x] The existing UI can perform all supported board operations through the backend.
 - Error and loading states are covered by tests.
 
 ## Part 8: OpenRouter connectivity

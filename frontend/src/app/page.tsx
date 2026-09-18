@@ -9,6 +9,7 @@ import {
   getServerAccountSnapshot,
   getServerSessionSnapshot,
   getSessionSnapshot,
+  getStoredAccount,
   storeSession,
   subscribeToAccount,
   subscribeToSession,
@@ -39,6 +40,7 @@ export default function Home() {
 
   return (
     <KanbanBoard
+      account={getStoredAccount() ?? undefined}
       onLogout={() => {
         clearSession();
       }}
