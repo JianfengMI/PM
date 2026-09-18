@@ -189,23 +189,23 @@
 
 ### Checklist
 
-- [ ] Add a small backend AI client isolated from HTTP handlers and board mutation logic.
-- [ ] Load `OPENROUTER_API_KEY` from environment configuration.
-- [ ] Configure the agreed model and OpenRouter request format.
-- [ ] Add a development/test connectivity operation for the simple `2+2` prompt.
-- [ ] Keep external AI tests opt-in so the normal test suite does not require a live key.
-- [ ] Define timeout and error behavior for unavailable or invalid AI responses.
+- [x] Add a small backend AI client isolated from HTTP handlers and board mutation logic.
+- [x] Load `OPENROUTER_API_KEY` from environment configuration.
+- [x] Configure the agreed model and OpenRouter request format.
+- [x] Add a development/test connectivity operation for the simple `2+2` prompt.
+- [x] Keep external AI tests opt-in so the normal test suite does not require a live key.
+- [x] Define timeout and error behavior for unavailable or invalid AI responses.
 
 ### Tests and checks
 
-- Unit-test request construction with a mocked OpenRouter response.
-- Test missing-key and provider-error handling.
-- Run the live `2+2` connectivity check when a valid key is available.
+- [x] Unit-test request construction with a mocked OpenRouter response.
+- [x] Test missing-key, timeout, malformed-response, and provider-error handling.
+- [x] Run the live `2+2` connectivity check with the configured key.
 
 ### Success criteria
 
-- The backend can make a verified OpenRouter request using the configured model.
-- Failures are reported clearly and do not crash unrelated board operations.
+- [x] The backend can make a verified OpenRouter request using the configured model.
+- [x] Failures are reported clearly and do not crash unrelated board operations.
 
 ## Part 9: Structured AI board operations
 

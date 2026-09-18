@@ -28,6 +28,8 @@ The protected board routes are `GET /api/board` and `PUT /api/board`. They use H
 
 The API allows local development calls from the frontend at ports `3000` on `127.0.0.1` and `localhost`. Production uses same-origin requests.
 
+The protected `POST /api/ai/test` endpoint performs the Part 8 `2+2` connectivity check through OpenRouter. Configure `OPENROUTER_API_KEY`, optionally `OPENROUTER_MODEL`, and optionally `OPENROUTER_TIMEOUT` through `.env` or the process environment.
+
 ## Conventions
 
 - Use Python with FastAPI and type annotations.

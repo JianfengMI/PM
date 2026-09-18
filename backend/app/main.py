@@ -1,12 +1,18 @@
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.auth import get_current_user
 from backend.app.datastore import Board, JsonDataStore, UserRecord
+from backend.app.openrouter import (
+    MissingOpenRouterKey,
+    OpenRouterClient,
+    OpenRouterError,
+)
 
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
@@ -16,7 +22,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
     allow_credentials=False,
-    allow_methods=["GET", "PUT"],
+    allow_methods=["GET", "PUT", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -31,6 +37,28 @@ def hello() -> dict[str, str]:
 
 def get_datastore() -> JsonDataStore:
     return JsonDataStore()
+
+
+def get_openrouter_client() -> OpenRouterClient:
+    return OpenRouterClient()
+
+
+class AITestResponse(BaseModel):
+    answer: str
+
+
+@app.post("/api/ai/test", response_model=AITestResponse)
+def test_ai_connectivity(
+    user: UserRecord = Depends(get_current_user),
+    client: OpenRouterClient = Depends(get_openrouter_client),
+) -> AITestResponse:
+    del user
+    try:
+        return AITestResponse(answer=client.complete("What is 2+2? Answer with only the number."))
+    except MissingOpenRouterKey as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except OpenRouterError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
 
 
 @app.get("/api/board", response_model=Board)
