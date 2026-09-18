@@ -11,7 +11,7 @@ This project is building a Project Management App. Key features:
 
 ## Limitations
 
-For the MVP, there will only be a user sign in (hardcoded to 'user' and 'password') but the database will support multiple users for future.
+For the MVP, a user signs up locally before signing in; the database will support multiple users for future backend integration.
 
 For the MVP, there will only be 1 Kanban board per signed in user.
 

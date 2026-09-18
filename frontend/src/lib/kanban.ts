@@ -15,6 +15,29 @@ export type BoardData = {
   cards: Record<string, Card>;
 };
 
+export const BOARD_STORAGE_KEY = "kanban-studio-board";
+
+export const loadBoard = (): BoardData => {
+  if (typeof window === "undefined") {
+    return initialData;
+  }
+
+  const storedBoard = window.localStorage.getItem(BOARD_STORAGE_KEY);
+  if (!storedBoard) {
+    return initialData;
+  }
+
+  try {
+    return JSON.parse(storedBoard) as BoardData;
+  } catch {
+    return initialData;
+  }
+};
+
+export const saveBoard = (board: BoardData) => {
+  window.localStorage.setItem(BOARD_STORAGE_KEY, JSON.stringify(board));
+};
+
 export const initialData: BoardData = {
   columns: [
     { id: "col-backlog", title: "Backlog", cardIds: ["card-1", "card-2"] },
