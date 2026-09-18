@@ -120,20 +120,20 @@
 - [x] Define the datastore file location and initialization behavior.
 - [x] Define how writes are persisted and how malformed or missing data is handled.
 - [x] Document the schema and persistence approach in `docs/DATASTORE.md`.
-- [ ] Get user sign-off on the schema before implementing board persistence.
+- [x] Get user sign-off on the schema before implementing board persistence.
 
 ### Tests and checks
 
-- Validate representative empty, default, and populated board documents.
-- Test initialization when the file does not exist.
-- Test persistence and reload of representative board changes.
-- Test rejection of invalid schema data without corrupting the datastore.
+- [x] Validate representative empty, default, and populated board documents.
+- [x] Test initialization when the file does not exist.
+- [x] Test persistence and reload of representative board changes.
+- [x] Test rejection of invalid schema data without corrupting the datastore.
 
 ### Success criteria
 
-- The schema is documented and approved before Part 6.
-- The JSON file can represent the MVP board and multiple future users.
-- Initialization, read, write, and validation behavior are specified by tests.
+- [x] The schema is documented and approved before Part 6.
+- [x] The JSON file can represent the MVP board and multiple future users.
+- [x] Initialization, read, write, and validation behavior are specified by tests.
 
 ## Part 6: Backend board API
 
