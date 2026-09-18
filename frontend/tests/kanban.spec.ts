@@ -46,6 +46,20 @@ test("requires sign up, sign in, and supports logout", async ({ page }) => {
   await expect(page.getByLabel("Username")).toBeVisible();
 });
 
+test("shows sign in on a fresh launch", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    window.localStorage.setItem(
+      "kanban-studio-account",
+      JSON.stringify({ username: "user", password: "password" })
+    );
+  });
+  await page.reload();
+
+  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Kanban Studio" })).toBeVisible();
+});
+
 test("loads the kanban board", async ({ page }) => {
   await signIn(page);
   await expect(page.getByRole("heading", { name: "Kanban Studio" })).toBeVisible();
@@ -103,4 +117,39 @@ test("persists board changes after logout and sign in", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in" }).click();
 
   await expect(page.getByText(persistentCardTitle, { exact: true })).toBeVisible();
+});
+
+test("chat assistant responds and refreshes the board", async ({ page }) => {
+  await signIn(page);
+  const boardResponse = await page.request.get("http://127.0.0.1:8000/api/board", {
+    headers: { Authorization: "Basic dXNlcjpwYXNzd29yZA==" },
+  });
+  const board = await boardResponse.json();
+  const assistantCard = {
+    id: `ai-card-${Date.now()}`,
+    title: "Assistant follow-up",
+    details: "Created from chat.",
+  };
+  board.cards[assistantCard.id] = assistantCard;
+  board.columns[0].cardIds.push(assistantCard.id);
+
+  await page.route("**/api/ai/chat", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        response: "I added the follow-up card.",
+        board,
+        board_updated: true,
+      }),
+    });
+  });
+
+  await page.getByLabel("Your question").fill("Add a follow-up card.");
+  await page.getByLabel("Your question").press("Enter");
+
+  await expect(page.getByText("Add a follow-up card.", { exact: true })).toBeVisible();
+  await expect(page.getByText("I added the follow-up card.")).toBeVisible();
+  await expect(page.getByText("Assistant follow-up", { exact: true })).toBeVisible();
 });

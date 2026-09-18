@@ -51,6 +51,26 @@ def test_client_builds_openrouter_request() -> None:
     assert b'"role":"user"' in captured["payload"]  # type: ignore[operator]
 
 
+def test_client_adds_structured_response_format() -> None:
+    captured: dict[str, object] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["payload"] = request.read()
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": '{"response":"4","actions":[]}'}}]},
+        )
+
+    result = OpenRouterClient(api_key="test-key", transport=mock_transport(handler)).complete_json(
+        [{"role": "user", "content": "Return JSON."}],
+        {"type": "object", "properties": {"response": {"type": "string"}}},
+    )
+
+    assert result == {"response": "4", "actions": []}
+    assert b'"response_format"' in captured["payload"]  # type: ignore[operator]
+    assert b'"json_schema"' in captured["payload"]  # type: ignore[operator]
+
+
 def test_missing_api_key_is_reported() -> None:
     with pytest.raises(MissingOpenRouterKey, match="OPENROUTER_API_KEY"):
         OpenRouterClient(api_key="").complete("2+2")

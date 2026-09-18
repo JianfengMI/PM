@@ -13,10 +13,12 @@ import {
 } from "@dnd-kit/core";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { KanbanCardPreview } from "@/components/KanbanCardPreview";
+import { ChatSidebar } from "@/components/ChatSidebar";
 import {
   createId,
+  loadAccountBoard,
   moveCard,
-  initialData,
+  saveAccountBoard,
   type BoardData,
 } from "@/lib/kanban";
 import { fetchBoard, updateBoard } from "@/lib/api";
@@ -28,9 +30,12 @@ type KanbanBoardProps = {
 };
 
 export const KanbanBoard = ({ account, onLogout = () => {} }: KanbanBoardProps) => {
-  const [board, setBoard] = useState<BoardData>(() => initialData);
+  const [board, setBoard] = useState<BoardData>(() =>
+    account ? loadAccountBoard(account.username) : loadAccountBoard("default")
+  );
   const [isLoading, setIsLoading] = useState(Boolean(account));
   const [error, setError] = useState("");
+  const [isChatOpen, setIsChatOpen] = useState(true);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,11 +52,13 @@ export const KanbanBoard = ({ account, onLogout = () => {} }: KanbanBoardProps) 
       .then((nextBoard) => {
         if (isCurrent) {
           setBoard(nextBoard);
+          saveAccountBoard(account.username, nextBoard);
           setError("");
         }
       })
       .catch(() => {
         if (isCurrent) {
+          setBoard(loadAccountBoard(account.username));
           setError("Unable to load your board. Check that the backend is running.");
         }
       })
@@ -68,6 +75,9 @@ export const KanbanBoard = ({ account, onLogout = () => {} }: KanbanBoardProps) 
 
   const applyBoard = (nextBoard: BoardData) => {
     setBoard(nextBoard);
+    if (account) {
+      saveAccountBoard(account.username, nextBoard);
+    }
     if (account) {
       updateBoard(nextBoard, account).catch(() => {
         setError("Unable to save your latest board change.");
@@ -150,9 +160,10 @@ export const KanbanBoard = ({ account, onLogout = () => {} }: KanbanBoardProps) 
     if (account) {
       try {
         await updateBoard(board, account);
+        saveAccountBoard(account.username, board);
       } catch {
+        saveAccountBoard(account.username, board);
         setError("Unable to save your latest board change.");
-        return;
       }
     }
     onLogout();
@@ -194,6 +205,16 @@ export const KanbanBoard = ({ account, onLogout = () => {} }: KanbanBoardProps) 
               >
                 Log out
               </button>
+              {account ? (
+                <button
+                  type="button"
+                  onClick={() => setIsChatOpen((open) => !open)}
+                  className="rounded-full bg-[var(--primary-blue)] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110"
+                  aria-expanded={isChatOpen}
+                >
+                  {isChatOpen ? "Hide assistant" : "Open assistant"}
+                </button>
+              ) : null}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4">
@@ -217,32 +238,44 @@ export const KanbanBoard = ({ account, onLogout = () => {} }: KanbanBoardProps) 
           ) : null}
         </header>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <section className="grid gap-6 lg:grid-cols-5">
-            {board.columns.map((column) => (
-              <KanbanColumn
-                key={column.id}
-                column={column}
-                cards={column.cardIds.map((cardId) => board.cards[cardId])}
-                onRename={handleRenameColumn}
-                onAddCard={handleAddCard}
-                onDeleteCard={handleDeleteCard}
-              />
-            ))}
-          </section>
-          <DragOverlay>
-            {activeCard ? (
-              <div className="w-[260px]">
-                <KanbanCardPreview card={activeCard} />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+        <div className={isChatOpen && account ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]" : ""}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <section className="grid gap-6 lg:grid-cols-5">
+              {board.columns.map((column) => (
+                <KanbanColumn
+                  key={column.id}
+                  column={column}
+                  cards={column.cardIds.map((cardId) => board.cards[cardId])}
+                  onRename={handleRenameColumn}
+                  onAddCard={handleAddCard}
+                  onDeleteCard={handleDeleteCard}
+                />
+              ))}
+            </section>
+            <DragOverlay>
+              {activeCard ? (
+                <div className="w-[260px]">
+                  <KanbanCardPreview card={activeCard} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+          {isChatOpen && account ? (
+            <ChatSidebar
+              board={board}
+              onBoardUpdated={(nextBoard) => {
+                setBoard(nextBoard);
+                setError("");
+              }}
+              onClose={() => setIsChatOpen(false)}
+            />
+          ) : null}
+        </div>
       </main>
     </div>
   );

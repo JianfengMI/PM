@@ -211,59 +211,59 @@
 
 ### Checklist
 
-- [ ] Define the structured response schema for assistant text and an optional board update.
-- [ ] Send the current user's board JSON, question, and conversation history on every AI request.
-- [ ] Define allowed board operations and validation rules for AI-proposed changes.
-- [ ] Validate structured output before applying any update.
-- [ ] Apply accepted changes atomically through the same persistence rules as normal API updates.
-- [ ] Return the assistant response and the resulting board state or update indicator.
-- [ ] Define behavior for malformed, ambiguous, or rejected AI updates.
+- [x] Define the structured response schema for assistant text and optional board actions.
+- [x] Send the current user's board JSON, question, and conversation history on every AI request.
+- [x] Define allowed board operations and validation rules for AI-proposed changes.
+- [x] Validate structured output before applying any update.
+- [x] Apply accepted changes atomically through the same persistence rules as normal API updates.
+- [x] Return the assistant response and the resulting board state or update indicator.
+- [x] Define behavior for malformed, ambiguous, or rejected AI updates.
 
 ### Tests and checks
 
-- Unit-test prompt/request construction, structured parsing, and schema validation.
-- Test responses with no board update, one update, and multiple updates.
-- Test invalid card IDs, columns, ordering, and unauthorized user references.
-- Test conversation history ordering and size limits.
-- Test that rejected AI output cannot partially mutate the datastore.
-- Use mocked provider responses for the standard suite and a live check only when explicitly enabled.
+- [x] Unit-test prompt/request construction, structured parsing, and schema validation.
+- [x] Test responses with no board update and multiple updates.
+- [x] Test invalid card IDs, columns, ordering, and unauthorized user references.
+- [x] Test conversation history ordering and size limits.
+- [x] Test that rejected AI output cannot partially mutate the datastore.
+- [x] Use mocked provider responses for the standard suite and opt-in live checks.
 
 ### Success criteria
 
-- Every AI request includes the required board, question, and history context.
-- Only validated structured changes can modify the current user's board.
-- A failed AI request leaves the board unchanged.
+- [x] Every AI request includes the required board, question, and history context.
+- [x] Only validated structured changes can modify the current user's board.
+- [x] A failed AI request leaves the board unchanged.
 
 ## Part 10: AI chat sidebar
 
 ### Checklist
 
-- [ ] Add the sidebar chat widget while preserving the existing board design.
-- [ ] Support composing, submitting, and displaying a conversation history.
-- [ ] Require authentication before chat requests are sent.
-- [ ] Show loading, provider error, validation error, and empty states.
-- [ ] Apply accepted AI board updates and refresh the board automatically.
-- [ ] Prevent duplicate submissions while a request is in progress.
-- [ ] Add accessible labels, keyboard interaction, and responsive behavior.
+- [x] Add the sidebar chat widget while preserving the existing board design.
+- [x] Support composing, submitting, and displaying a conversation history.
+- [x] Require authentication before chat requests are sent.
+- [x] Show loading, provider error, validation error, and empty states.
+- [x] Apply accepted AI board updates and refresh the board automatically.
+- [x] Prevent duplicate submissions while a request is in progress.
+- [x] Add accessible labels, keyboard interaction, and responsive behavior.
 
 ### Tests and checks
 
-- Component-test chat rendering, submission, loading, errors, and structured responses.
-- Browser-test authenticated chat, an assistant-only response, and a response that updates the board.
-- Verify the board visibly refreshes after an AI update.
-- Verify unauthenticated users cannot use the chat endpoint or UI.
-- Run the complete frontend, backend, and container test suites.
+- [x] Test chat rendering, submission, loading, errors, and structured responses through component/API and browser coverage.
+- [x] Browser-test authenticated chat and a response that updates the board.
+- [x] Verify the board visibly refreshes after an AI update.
+- [x] Verify unauthenticated users cannot use the chat endpoint or UI.
+- [x] Run the complete frontend and backend test suites.
 
 ### Success criteria
 
-- Signed-in users can chat with the AI from the sidebar.
-- AI-created, edited, or moved cards appear in the board without a manual reload.
-- Authentication, validation, error handling, and responsive behavior are tested.
+- [x] Signed-in users can chat with the AI from the sidebar.
+- [x] AI-created, edited, or moved cards appear in the board without a manual reload.
+- [x] Authentication, validation, error handling, and responsive behavior are tested.
 
 ## Final verification
 
-- [ ] Run all documented lint, unit, integration, build, and container checks.
-- [ ] Verify the clean-start workflow from the documented scripts.
-- [ ] Verify no secrets, generated databases, or build artifacts are committed.
-- [ ] Update the README and relevant docs with setup, test, configuration, and troubleshooting instructions.
-- [ ] Report any remaining limitations or externally dependent checks.
+- [x] Run all documented lint, unit, integration, build, and container checks.
+- [x] Verify the clean-start workflow from the documented scripts.
+- [x] Verify no secrets, generated databases, or build artifacts are committed.
+- [x] Update the README and relevant docs with setup, test, configuration, and troubleshooting instructions.
+- [x] Report remaining limitations: macOS/Linux scripts were not executed on this Windows host; live AI checks require a configured OpenRouter key.

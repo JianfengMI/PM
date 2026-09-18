@@ -17,6 +17,9 @@ export type BoardData = {
 
 export const BOARD_STORAGE_KEY = "kanban-studio-board";
 
+const accountBoardStorageKey = (username: string) =>
+  `${BOARD_STORAGE_KEY}:${username}`;
+
 export const loadBoard = (): BoardData => {
   if (typeof window === "undefined") {
     return initialData;
@@ -36,6 +39,27 @@ export const loadBoard = (): BoardData => {
 
 export const saveBoard = (board: BoardData) => {
   window.localStorage.setItem(BOARD_STORAGE_KEY, JSON.stringify(board));
+};
+
+export const loadAccountBoard = (username: string): BoardData => {
+  if (typeof window === "undefined") {
+    return initialData;
+  }
+
+  const storedBoard = window.localStorage.getItem(accountBoardStorageKey(username));
+  if (!storedBoard) {
+    return initialData;
+  }
+
+  try {
+    return JSON.parse(storedBoard) as BoardData;
+  } catch {
+    return initialData;
+  }
+};
+
+export const saveAccountBoard = (username: string, board: BoardData) => {
+  window.localStorage.setItem(accountBoardStorageKey(username), JSON.stringify(board));
 };
 
 export const initialData: BoardData = {

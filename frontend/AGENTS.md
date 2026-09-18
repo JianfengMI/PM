@@ -15,6 +15,7 @@ This directory contains the Next.js frontend for the Project Management MVP. The
   - `NewCardForm.tsx` handles local new-card form state.
 - `src/lib/kanban.ts` defines `Card`, `Column`, and `BoardData`, provides the demo data, and contains card movement and ID helpers.
 - `src/lib/api.ts` contains the authenticated board API client used by the signed-in page.
+- `src/components/ChatSidebar.tsx` provides the authenticated assistant conversation UI and applies server-returned board updates.
 - `src/**/*.test.{ts,tsx}` contains Vitest unit and component tests.
 - `tests/` contains Playwright browser tests.
 - `public/` contains static frontend assets.

@@ -1,12 +1,19 @@
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.auth import get_current_user
+from backend.app.ai import (
+    AIResponse,
+    ChatRequest,
+    ChatResponse,
+    apply_actions,
+    build_chat_messages,
+)
 from backend.app.datastore import Board, JsonDataStore, UserRecord
 from backend.app.openrouter import (
     MissingOpenRouterKey,
@@ -59,6 +66,35 @@ def test_ai_connectivity(
         raise HTTPException(status_code=503, detail=str(error)) from error
     except OpenRouterError as error:
         raise HTTPException(status_code=502, detail=str(error)) from error
+
+
+@app.post("/api/ai/chat", response_model=ChatResponse)
+def chat(
+    request: ChatRequest,
+    client: OpenRouterClient = Depends(get_openrouter_client),
+) -> ChatResponse:
+    try:
+        payload = client.complete_json(
+            build_chat_messages(request.board, request),
+            AIResponse.model_json_schema(),
+        )
+        ai_response = AIResponse.model_validate(payload)
+    except ValidationError as error:
+        raise HTTPException(status_code=502, detail="Invalid structured AI response") from error
+    except OpenRouterError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+
+    try:
+        next_board = apply_actions(request.board, ai_response.actions)
+        board_updated = bool(ai_response.actions)
+    except (KeyError, ValueError) as error:
+        raise HTTPException(status_code=422, detail="AI board update was rejected") from error
+
+    return ChatResponse(
+        response=ai_response.response,
+        board=next_board,
+        board_updated=board_updated,
+    )
 
 
 @app.get("/api/board", response_model=Board)

@@ -1,4 +1,6 @@
 import os
+import json
+from collections.abc import Mapping, Sequence
 
 import httpx
 from dotenv import load_dotenv
@@ -31,15 +33,32 @@ class OpenRouterClient:
         self.transport = transport
 
     def complete(self, prompt: str) -> str:
+        content = self.complete_messages([{"role": "user", "content": prompt}])
+        return content
+
+    def complete_messages(
+        self,
+        messages: Sequence[Mapping[str, str]],
+        response_schema: dict[str, object] | None = None,
+    ) -> str:
         if not self.api_key:
             raise MissingOpenRouterKey("OPENROUTER_API_KEY is not configured")
-        if not prompt.strip():
-            raise OpenRouterError("prompt must not be empty")
+        if not messages or any(not message.get("content", "").strip() for message in messages):
+            raise OpenRouterError("messages must not be empty")
 
-        payload = {
+        payload: dict[str, object] = {
             "model": self.model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": list(messages),
         }
+        if response_schema is not None:
+            payload["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "project_management_response",
+                    "strict": True,
+                    "schema": response_schema,
+                },
+            }
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
@@ -65,3 +84,17 @@ class OpenRouterClient:
         if not isinstance(content, str) or not content.strip():
             raise OpenRouterError("OpenRouter returned an empty response")
         return content
+
+    def complete_json(
+        self,
+        messages: Sequence[Mapping[str, str]],
+        response_schema: dict[str, object],
+    ) -> dict[str, object]:
+        content = self.complete_messages(messages, response_schema)
+        try:
+            payload = json.loads(content)
+        except json.JSONDecodeError as error:
+            raise OpenRouterError("OpenRouter returned invalid JSON") from error
+        if not isinstance(payload, dict):
+            raise OpenRouterError("OpenRouter returned a JSON object")
+        return payload

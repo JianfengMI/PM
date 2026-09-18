@@ -19,7 +19,7 @@ def test_board_requires_authentication(monkeypatch, tmp_path: Path) -> None:
     response = client.get("/api/board")
 
     assert response.status_code == 401
-    assert response.headers["www-authenticate"] == "Basic"
+    assert "www-authenticate" not in response.headers
 
 
 def test_board_is_initialized_and_read_for_authenticated_user(

@@ -47,4 +47,22 @@ describe("board API client", () => {
 
     await expect(fetchBoard(credentials)).rejects.toThrow("API request failed: 500");
   });
+
+  it("sends chat without a second authentication header", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ response: "Done", board: initialData, board_updated: false }), {
+        status: 200,
+      })
+    );
+
+    const { sendChat } = await import("@/lib/api");
+    await sendChat("Hello", [], initialData);
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/ai/chat"),
+      expect.objectContaining({
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+  });
 });

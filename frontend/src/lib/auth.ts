@@ -2,6 +2,7 @@ export const AUTH_STORAGE_KEY = "kanban-studio-authenticated";
 export const ACCOUNT_STORAGE_KEY = "kanban-studio-account";
 
 const listeners = new Set<() => void>();
+let isSessionActive = false;
 
 export type Account = {
   username: string;
@@ -36,17 +37,15 @@ export const registerAccount = (username: string, password: string) => {
   return true;
 };
 
-export const hasStoredSession = () =>
-  typeof window !== "undefined" &&
-  window.localStorage.getItem(AUTH_STORAGE_KEY) === "true";
+export const hasStoredSession = () => isSessionActive;
 
 export const storeSession = () => {
-  window.localStorage.setItem(AUTH_STORAGE_KEY, "true");
+  isSessionActive = true;
   listeners.forEach((listener) => listener());
 };
 
 export const clearSession = () => {
-  window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  isSessionActive = false;
   listeners.forEach((listener) => listener());
 };
 

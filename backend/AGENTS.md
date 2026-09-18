@@ -30,6 +30,8 @@ The API allows local development calls from the frontend at ports `3000` on `127
 
 The protected `POST /api/ai/test` endpoint performs the Part 8 `2+2` connectivity check through OpenRouter. Configure `OPENROUTER_API_KEY`, optionally `OPENROUTER_MODEL`, and optionally `OPENROUTER_TIMEOUT` through `.env` or the process environment.
 
+The protected `POST /api/ai/chat` endpoint accepts a question and up to 20 history messages. It sends the current board and conversation context to OpenRouter using structured JSON output, validates the returned actions, and persists accepted board changes atomically.
+
 ## Conventions
 
 - Use Python with FastAPI and type annotations.
